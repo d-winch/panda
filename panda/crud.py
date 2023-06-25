@@ -32,6 +32,7 @@ class ErrorsEng(Enum):
         "A patient already exists with this NHS Number, NHS No.: "
     )
     APPT_ALREADY_ATTENDED = "Cannot alter an attended appointment, ID: "
+    NO_ADDRESS_FOR_PATIENT_ID = "No address found for patient, ID: "
 
 
 def get_patient_by_id(db: Session, patient_id: int):
@@ -113,43 +114,56 @@ def delete_patient(db: Session, patient_id: int):
     db_patient = get_patient_by_id(db=db, patient_id=patient_id)
     db.delete(db_patient)
     db.commit()
-    return
+    return []
 
 
 def get_addresses(db: Session, offset: int = 0, limit: int = 100):
     return db.query(models.Address).offset(offset).limit(limit).all()
 
 
+# [ ] TODO - Abstract to -> create_owner_address and use owner_type
+# Prevents a separate function to create address for department, etc
 def create_patient_address(
-    db: Session, address: schemas.AddressCreate, owner_id: int
+    db: Session, address: schemas.AddressCreate, patient_id: int
 ):
     owner = (
-        db.query(models.Patient).filter(models.Patient.id == owner_id).first()
+        db.query(models.Patient)
+        .filter(models.Patient.id == patient_id)
+        .first()
     )
     if not owner:
         raise HTTPException(
-            403, detail=f"{ErrorsEng.NO_PATIENT_FOR_ID.value}'{owner_id}'"
+            403, detail=f"{ErrorsEng.NO_PATIENT_FOR_ID.value}'{patient_id}'"
         )
-    db_address = models.Address(**address.dict(), owner_id=owner_id)
+    db_address = models.Address(**address.dict(), owner_id=patient_id)
     db.add(db_address)
     db.commit()
     db.refresh(db_address)
     return db_address
 
 
-def get_address_by_owner_id(db: Session, owner_id: int):
-    owner = (
-        db.query(models.Patient).filter(models.Patient.id == owner_id).first()
-    )
+# [ ] TODO - Abstract to -> get_address_by_owner_id and use owner_type
+# Prevents a separate function to get address for department, etc
+def get_address_by_patient_id(db: Session, patient_id: int):
+    owner = get_patient_by_id(db=db, patient_id=patient_id)
     if not owner:
         raise HTTPException(
-            403, detail=f"{ErrorsEng.NO_PATIENT_FOR_ID.value}'{owner_id}'"
+            403, detail=f"{ErrorsEng.NO_PATIENT_FOR_ID.value}'{patient_id}'"
         )
-    return (
+    # [ ] TODO - use owner object above
+    db_address = (
         db.query(models.Address)
-        .filter(models.Address.owner_id == owner_id)
-        .all()
+        .filter(models.Address.owner_type == "patient")
+        .filter(models.Address.owner_id == patient_id)
+        .order_by(models.Address.id.desc())
+        .first()
     )
+    if not db_address:
+        raise HTTPException(
+            404,
+            detail=f"{ErrorsEng.NO_ADDRESS_FOR_PATIENT_ID.value}'{patient_id}'",
+        )
+    return db_address
 
 
 def get_address_by_id(db: Session, address_id: int):
