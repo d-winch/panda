@@ -3,6 +3,7 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 from panda import models
 from panda.core.config import settings
@@ -56,3 +57,19 @@ async def add_process_time_header(request: Request, call_next):
                 f"\tRequest_Body: {request.body()}\n")  # [ ] TODO get body and params
     return response
 
+
+@app.get("/")
+async def root():
+    html_content = """
+    <html>
+        <head>
+            <title>PANDA CRUD API</title>
+        </head>
+        <body>
+            <h1>Welcome to the PANDA API</h1>
+            <p>See OPENAPI docs at: <a href="/docs">/docs</a></p>
+            <p>Or Redoc docs at: <a href="/redoc">/redoc</a></p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
