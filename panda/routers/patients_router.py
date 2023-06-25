@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from panda import crud, schemas
@@ -57,24 +57,13 @@ async def delete_patient(patient_id: int, db: Session = Depends(get_db)):
     return crud.delete_patient(db=db, patient_id=patient_id)
 
 
-@router.put(
-    "/{patient_id}",
-    responses={403: {"description": "Operation forbidden"}},
-)
+@router.put("/{patient_id}")
 async def update_patient(
     patient_id: int,
     patient: schemas.PatientCreate,
     db: Session = Depends(get_db),
 ):
-    db_stored_patient = crud.get_patient_by_id(patient_id=patient_id, db=db)
-    if not db_stored_patient:
-        raise HTTPException(
-            status_code=403, detail=f"No patient found for ID: {patient_id}"
-        )
-    db_updated_patient = crud.update_patient(
-        db=db, patient_id=patient_id, patient=patient
-    )
-    return db_updated_patient
+    return crud.update_patient(db=db, patient_id=patient_id, patient=patient)
 
 
 @router.post("/{patient_id}/address", response_model=schemas.Address)
@@ -83,18 +72,11 @@ async def create_patient_address(
     patient_id: int,
     db: Session = Depends(get_db),
 ):
-    db_address = crud.create_patient_address(
-        db=db, address=address, owner_id=patient_id
+    return crud.create_patient_address(
+        db=db, address=address, patient_id=patient_id
     )
-    if not db_address:
-        raise HTTPException(
-            400,
-            detail=f"Cannot create an address for an unknown owner: {patient_id}",
-        )
-    return db_address
 
 
-@router.get("/{patient_id}/address", response_model=List[schemas.Address])
+@router.get("/{patient_id}/address", response_model=schemas.Address)
 async def get_patient_address(patient_id: int, db: Session = Depends(get_db)):
-    db_address = crud.get_address_by_owner_id(db=db, owner_id=patient_id)
-    return db_address
+    return crud.get_address_by_patient_id(db=db, patient_id=patient_id)
