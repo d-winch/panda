@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Union
 
 from pydantic import BaseModel, Field, validator
@@ -135,13 +135,29 @@ class AppointmentBase(BaseModel):
     # department_id: int
     # location_id: int
     # organisation_id: int
-    start_at: datetime = Field(example="2023-06-25T10:00:00.000Z", description="A valid date time")
-    end_at: datetime = Field(example="2023-06-25T11:00:00.000Z", description="A valid date time")
+    start_at: datetime = Field(example="2023-06-25T10:00:00.000Z", description="A valid ISO 8601 date time")
+    end_at: datetime = Field(example="2023-06-25T11:00:00.000Z", description="A valid ISO 8601 date time")
+
 
 
 class AppointmentCreate(AppointmentBase):
-    pass
 
+    @validator("start_at", "end_at")
+    def validate_datetime_timezone(cls, v: datetime) -> datetime:
+        print("tz:", v.tzinfo)
+        if v.tzinfo is None:
+            raise ValueError(f"Could not parse date time without timezone: {v}")
+        return v
+
+    @validator("end_at")
+    def validate_start_before_end(cls, end_at: datetime, values, field, config) -> datetime:
+        print(values)
+        start_at = values.get("start_at", None)
+        if not start_at:
+            return end_at
+        if start_at > end_at:
+            raise ValueError(f"Start time '{start_at}' cannot be after end time '{end_at}'")
+        return end_at
 
 class Appointment(AppointmentBase):
     id: int

@@ -33,6 +33,7 @@ class ErrorsEng(Enum):
     )
     APPT_ALREADY_ATTENDED = "Cannot alter an attended appointment, ID: "
     NO_ADDRESS_FOR_PATIENT_ID = "No address found for patient, ID: "
+    
 
 
 def get_patient_by_id(db: Session, patient_id: int):
@@ -62,7 +63,7 @@ def get_patient_by_nhs_number(db: Session, nhs_number: str):
     return db_patient
 
 
-def get_patients(db: Session, offset: int = 0, limit: int = 100):
+def get_patients(db: Session, query: str, offset: int = 0, limit: int = 100):
     return db.query(models.Patient).offset(offset).limit(limit).all()
 
 
@@ -193,11 +194,17 @@ def get_appointment_by_id(db: Session, appointment_id):
 
 
 def create_appointment(db: Session, appointment: schemas.AppointmentCreate):
-    db_appointment = models.Appointment(**appointment.dict())
-    db.add(db_appointment)
+    db_patient = get_patient_by_id(db=db, patient_id=appointment.patient_id)
+    if not db_patient:
+        raise HTTPException(
+            status_code=403,
+            detail=f"{ErrorsEng.NO_PATIENT_FOR_ID.value}{appointment.patient_id}",
+        )
+    appointment = models.Appointment(**appointment.dict())
+    db.add(appointment)
     db.commit()
-    db.refresh(db_appointment)
-    return db_appointment
+    db.refresh(appointment)
+    return appointment
 
 
 def update_appointment(
