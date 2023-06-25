@@ -62,7 +62,7 @@ We can also add our own validator methods with decorators. For example, using Re
 
 ### NHS Number Validation
 
-Validation is done via [is_valid_nhs_number](panda/utl/nhs_validator.py). The NHS Number is checked via Pydantic's validator decorator. ValueError is raised and returned to the user if the payload number fails this check.
+Validation is done via [is_valid_nhs_number](panda/util/nhs_validator.py). The NHS Number is checked via Pydantic's validator decorator. ValueError is raised and returned to the user if the payload number fails this check.
 
 ## Testing
 
@@ -137,6 +137,8 @@ Remove Address router file - Addresses are attached to a resource. We can get th
 Allow queries for requests, beyond just limit and offset.
 
 Index database columns.
+
+Better documentation explanations/examples. E.g., AddressOwnerType in Schema - What is it? What are potential values?
 
 ## Endpoints
 
