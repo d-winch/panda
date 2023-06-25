@@ -18,16 +18,16 @@ class Patient(Base):
     sex = Column(String)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
-    address = relationship("Address", back_populates="owner", cascade="all,delete")
-    appointments = relationship("Appointment", back_populates="patient")  # [ ] TODO Cascade type
+    address = relationship("Address", primaryjoin="and_(foreign(Address.owner_type)=='patient', Patient.id==foreign(Address.owner_id))")
+    appointments = relationship("Appointment", back_populates="patient")
 
-
+# [ ] TODO - Index owner_type & owner_id
 class Address(Base):
     __tablename__ = "addresses"
 
     id = Column(Integer, primary_key=True, index=True)
     owner_type = Column(String)
-    owner_id = Column(Integer, ForeignKey("patients.id"), index=True)
+    owner_id = Column(Integer)
     line1 = Column(String)
     line2 = Column(String, default="")
     town = Column(String)
@@ -35,8 +35,6 @@ class Address(Base):
     postcode = Column(String)
     country = Column(String)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-
-    owner = relationship("Patient", back_populates="address")
 
 
 class Appointment(Base):
