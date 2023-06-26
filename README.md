@@ -1,6 +1,7 @@
-# d panda-crud
 
-A CRUD backend API built in Python with the [FastAPI](https://fastapi.tiangolo.com/https://fastapi.tiangolo.com/) framework.
+# panda-crud
+
+A CRUD backend API built in Python with the [FastAPI](https://fastapi.tiangolo.com/) framework.
 
 The application handles patient demographic data, addresses, and appointments.
 
