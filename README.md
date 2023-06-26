@@ -1,4 +1,3 @@
-
 # panda-crud
 
 A CRUD backend API built in Python with the [FastAPI](https://fastapi.tiangolo.com/) framework.
@@ -43,11 +42,11 @@ docker run -d -p 80:80 panda
 
 ### Hosted Version
 
-[https://pandacrud-1-r3693083.deta.app](https://pandacrud-1-r3693083.deta.app)
+[https://pandacrud-1-r3693083.deta.app](https://pandacrud-1-r3693083.deta.app) (Only allows GET actions)
 
 ## Docs
 
-Access OpenAPI docs via /docs, or Redoc via /redoc.
+Access OpenAPI docs via [URL]/docs, or Redoc via /redoc.
 
 Example payloads are included for patients, addresses and appointments in the OpenAPI docs.
 
