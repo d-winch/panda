@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from faker import Faker
@@ -93,11 +93,11 @@ for i in range(10):
     start_time: datetime = fake.date_time_between(
         datetime.utcnow(),
         datetime.utcnow() + timedelta(hours=fake.random_number(digits=1)),
-    )
-    end_time: datetime = start_time + timedelta(hours=1)
+    ).replace(tzinfo=timezone.utc)
+    end_time: datetime = (start_time + timedelta(hours=1))
 
     fake_appointments.append(
-        AppointmentCreate(patient_id=i, start_at=start_time, end_at=end_time)
+        AppointmentCreate(patient_id=i + 1, start_at=start_time, end_at=end_time)
     )
 
 
@@ -110,7 +110,7 @@ for patient in fake_patients:
 print("\nCreating fake addresses...")
 for i, address in enumerate(fake_addresses, 1):
     print(i, address)
-    crud.create_patient_address(db=db, address=address, owner_id=i)
+    crud.create_patient_address(db=db, address=address, patient_id=i)
 
 print("\nCreating fake appointments...")
 for appointment in fake_appointments:
