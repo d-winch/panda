@@ -72,6 +72,16 @@ Basic examples of unit tests are included in [/tests](/tests). These are perform
 
 The database currently uses SQLite for the MVP but FastAPI can easily integrate with any database supported by SQLAlchemy, e.g., PostgreSQL, MySQL. Migrations need to be enacted with a third-party tool, like Alembic.
 
+## Populate Database
+
+The database can be filled with fake data with:
+
+```
+python -m panda.populate_db
+```
+
+This will drop data from an existing db, create and populate the panda_app.db file with fake patients, addresses and appointments.
+
 ## Additional Thoughts and Considerations
 
 Addresses have an owner_type and owner_id field. This allows us to use the Address table to add patient addresses, locations, departments, etc. We can then get the corresponding address record based on these two fields. This avoids having different tables for different address types.
