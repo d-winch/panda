@@ -14,20 +14,15 @@ from panda.util import nhs_validator
 # [ ] TODO - Add sensible values - Phone, Email, etc
 class PatientBase(BaseModel):
     nhs_number: str = Field(
-        example="543 820 7615",
         description="A valid, 10 digit NHS Number. Non-numeric characters are stripped.",
     )
-    name: str = Field(example="David Winch")
+    name: str = Field()
     # email: EmailStr = Field(
     #     example="david.winch@gmail.com",
     #     description="A valid format email address",
     # )  # No tests implemented yet, due to time
-    dob: date = Field(
-        example="1988-25-12", description="A valid date in ISO 8601 format"
-    )
-    sex: Sex = Field(
-        example="Male", description=f"An Enum value of {Sex.list()}"
-    )
+    dob: date = Field(description="A valid date in ISO 8601 format")
+    sex: Sex = Field(description=f"An Enum value of {Sex.list()}")
 
     @validator("nhs_number")
     def validate_nhs_number(cls, v: str) -> str:
@@ -51,14 +46,51 @@ class PatientBase(BaseModel):
 
 
 class PatientCreate(PatientBase):
+
     class Config:
         schema_extra = {
-            "example": {
-                "nhs_number": "543 820 7615",
-                "name": "David Winch",
-                "dob": "1988-12-25",
-                "sex": "Male",
-            }
+            "examples": {
+                "normal": {
+                    "summary": "A normal example",
+                    "description": "A **normal** patient works correctly.",
+                    "value": {
+                        "name": "David Winch",
+                        "nhs_number": "4959181745",
+                        "sex": "Male",
+                        "dob": "1988-12-25"
+                    }
+                },
+                "invalid nhs number": {
+                    "summary": "Invalid NHS Number",
+                    "description": "An example where NHS number validation fails",
+                    "value": {
+                        "name": "David Winch",
+                        "nhs_number": "4609571471a",
+                        "sex": "Male",
+                        "dob": "1988-12-25"
+                    }
+                },
+                "invalid sex": {
+                    "summary": "Invalid Sex",
+                    "description": "An example where sex validation fails",
+                    "value": {
+                        "name": "David Winch",
+                        "nhs_number": "8663598831",
+                        "sex": "Mmale",
+                        "dob": "1988-12-25"
+                    }
+                },
+                "blank name": {
+                    "summary": "Blank Name",
+                    "description": "An example where name validation fails",
+                    "value": {
+                        "name": "",
+                        "nhs_number": "7133568055",
+                        "sex": "Male",
+                        "dob": "1988-12-25"
+                    }
+                },
+            },
         }
 
 

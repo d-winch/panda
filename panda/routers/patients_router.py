@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
+from typing_extensions import Annotated
 
 from panda import crud, schemas
 from panda.database import SessionLocal
@@ -27,14 +28,15 @@ router = APIRouter(
 @router.get("/", response_model=List[schemas.Patient])
 async def get_patients(commons: CommonQuery, db: Session = Depends(get_db)):
     db_patients = crud.get_patients(
-        db, offset=commons.offset, limit=commons.limit
+        db, query=commons.query, offset=commons.offset, limit=commons.limit
     )
     return db_patients
 
 
 @router.post("/", response_model=schemas.Patient)
 async def create_patient(
-    patient: schemas.PatientCreate, db: Session = Depends(get_db)
+    patient: Annotated[schemas.PatientCreate, Body(
+        examples=schemas.PatientCreate.Config.schema_extra["examples"])], db: Session = Depends(get_db)
 ):
     return crud.create_patient(db=db, patient=patient)
 
